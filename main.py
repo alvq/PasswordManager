@@ -6,6 +6,7 @@ import getpass
 import encryption
 import database as db
 from time import sleep
+import json
 
 
 def cls(): os.system('cls' if os.name == 'nt' else 'clear')
@@ -34,9 +35,8 @@ def main():
     except:
         print("Something went wrong. Goodbye.")
     
-def mainMenu(password):
+def mainMenu(hashed_pass):
     cls()
-
     loop = True
     while loop:
         cls()
@@ -49,7 +49,7 @@ def mainMenu(password):
         print("6. Delete Database")
         print("7. Edit Profile")
         print("0. Exit\n\n")
-        
+
         response = input("Please select an option: ")
         cls()
         if response == "0":
@@ -57,28 +57,25 @@ def mainMenu(password):
             print("Goodbye.")
             break
         elif response == "1":
-            db.viewDatabase(password)
+            db.viewDatabase(hashed_pass)
+            print("Hello")
         elif response == "2":
-            db.addProfile(password)
+            db.addProfile(hashed_pass)
         elif response == "3":
-            db.findProfile(password)
+            db.findProfile(hashed_pass)
         elif response == "4":
             db.deleteProfile()
         elif response == "5":
-            db.changeMasterPassword(password)
+            db.changeMasterPassword(hashed_pass)
         elif response == "6":
-            db.deleteDatabase(password)
+            db.deleteDatabase(hashed_pass)
         elif response == "7":
-            db.editProfile(password)
+            db.editProfile(hashed_pass)
         else:
             cls()
             print("Response not understood. Stop messing around.")
-            sleep(2)
+            input()
             cls()
-        encryption.encrypt(db.database, key)
-        
-
-    del key
     return
 
 def generatePassword(size=12):

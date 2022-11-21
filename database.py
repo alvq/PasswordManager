@@ -16,24 +16,25 @@ def write_json(data, filename=database):
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
 
-def viewDatabase(password):
-   key = encryption.generate_key(password,load_existing_salt=True, save_salt=False)
-   encryption.decrypt(db.database, key)
-   with open(db.database, "r") as db:
-        temp = json.load(db)
-        data = temp["profiles"]
-        i = 0
-        for entry in data:
-            name = entry["Name"]
-            username = entry["Username"]
-            password = entry["Password"]
-            print(f"i: {i}")
-            print(f'Website : {name}')
-            print(f'Username: {username}')
-            print(f'Password: {password}\n\n')
-            i = i+1
-   input("Enter any key to exit: ")
-   return
+
+#takes in database and hashed password and displays all data in database from copy
+def viewDatabase(mPassword):
+    data = json.loads(encryption.get_data(database, mPassword))
+    stuff = data["profiles"]
+    i = 0
+    for entry in stuff:
+        name = entry["Name"]
+        username = entry["Username"]
+        password = entry["Password"]
+        print(f"i: {i}")
+        print(f'Website : {name}')
+        print(f'Username: {username}')
+        print(f'Password: {password}\n\n')
+        i = i+1
+    input("Enter any key to exit: ")
+    del stuff
+    del data
+    return
 
 def editProfile(password):
     return
@@ -48,34 +49,33 @@ def addProfile(password):
     newProfile["Username"] = input("Enter the username: ")
     newProfile["Password"] = input("Enter the password: ")
 
-    with open(database) as json_file:
-        data = json.load(json_file)
-        temp = data["profiles"]
-        temp.append(newProfile)
+    data = json.loads(encryption.get_data(database, password))
+    temp = data["profiles"]
+    temp.append(newProfile)    
 
-    write_json(data)
-
+    encryption.write_to_json_file(database, password, data)
+    del data
+    del temp
     return
 
 def findProfile(password):
-    found = False
     exit = False
+    data = json.loads(encryption.get_data(database, password))
+    entries = data["profiles"]
     while not exit:
+        found = False
         profileSearch = input("What is the name of the website for the Profile you want to see: ")
-        with open(database, "r") as db:
-            temp = json.load(db)
-            data = temp["profiles"]
-            for entry in data:
-                if entry["Name"] == profileSearch:
-                    found = True
-                    name = entry["Name"]
-                    username = entry["Username"]
-                    password = entry["Password"]
-                    print("Profile found!\n")
-                    print(f'Website : {name}')
-                    print(f'Username: {username}')
-                    print(f'Password: {password}\n\n')
-                    break
+        for entry in entries:
+            if entry["Name"] == profileSearch:
+                found = True
+                name = entry["Name"]
+                username = entry["Username"]
+                password = entry["Password"]
+                print("Profile found!\n")
+                print(f'Website : {name}')
+                print(f'Username: {username}')
+                print(f'Password: {password}\n\n')
+                break
 
         if found:
             ans1 = input("Would you like to search for another Profile? (Y/N) ")
@@ -87,7 +87,7 @@ def findProfile(password):
             else:
                 input("Didn't understand input. Press any key to return to main menu.")
                 return
-        if not found:
+        elif not found:
             ans2 = input("It looks like either the name was mistyped or your website has no Profile in the database yet. Would you like to start another search? (Y/N) ")
             if ans2 == "Y":
                 continue
@@ -97,23 +97,13 @@ def findProfile(password):
             else:
                 input("Didn't understand input. Press any key to return to main menu.")
                 return
-
+    del data
+    del entries
     return
 
 def deleteProfile():
-    viewDatabase()
-    input("What is the exact domain you would like to delete?")
     return
-    """   viewDatabase()
-    victim = input("Which profile are you looking to delete? Enter the name: ")
-    with open(database, "r") as db:
-        wholeStructure = json.load(db)
-        data = wholeStructure["profiles"]
-        temp = {}
-        for entry in data:
 
-            
-"""
 
 def changeMasterPassword(password):
     return

@@ -3,6 +3,7 @@ import base64
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.fernet import Fernet
 import hashlib
+import json
 
 """resources on this page found at thepythoncode.com"""  
 
@@ -67,10 +68,34 @@ def decrypt(filename, key):
 
     try:
         decrypted_data = f.decrypt(encrypted_data)
+
     except cryptography.fernet.InvalidToken:
         print("Invalid token, most likely the password is incorrect.")
         return
- 
     with open(filename, "wb") as file:
         file.write(decrypted_data)
+
+def get_data(filename, password):
+    """
+    To minimize interaction with decrypted database file, store decrypted data in a variable instead
+    """
+    key = generate_key(password, load_existing_salt=True, save_salt=False)
+
+    f = Fernet(key)
+    with open(filename, "rb") as file:
+        encrypted_data = file.read()
+    del key
+    return f.decrypt(encrypted_data)
+
+def write_to_json_file(filename, password, data):
+    """
+    specifically to dump data to the json file while keeping encryption intact
+    dumps over encrypted text without decrypting first, then encrypts again using key
+    """
+    key = generate_key(password, load_existing_salt=True, save_salt=False)
+
+    with open(filename, "w") as file:
+        json.dump(data, file, indent=4)
+
+    encrypt(filename, key)
 
