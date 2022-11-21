@@ -6,7 +6,6 @@ import getpass
 import encryption
 import database as db
 from time import sleep
-import json
 
 
 def cls(): os.system('cls' if os.name == 'nt' else 'clear')
