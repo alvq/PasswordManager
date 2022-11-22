@@ -155,7 +155,26 @@ def deleteProfile(password):
     else:
         input("Profile not found in database to remove. Returning to main menu.")
 
-
+def deleteDatabase():
+    print("DATABASE WIPE SETTINGS\n\n")
+    prompt = input("Are you sure you want to wipe the database? (Yes/No) ")
+    if prompt.lower() == "yes":
+        test = getpass.getpass("\nEnter your master password: ")
+        hashed_test = encryption.hash(test)
+        if verify_master(hashed_test):
+            data = json.loads(encryption.get_data(database, hashed_test))
+            entries = data["profiles"]            
+            for i in range(len(entries)-1):
+                del entries[i]
+            encryption.write_to_json_file(database, hashed_test, data)
+            input("Database wiped!")
+        else:
+            input("Get out of here!")
+            os.system('cls')
+            quit()    
+    elif prompt.lower() == "no":
+        input("That's what I thought!")
+    return
 
 def changeMasterPassword():
     print("MASTER PASSWORD SETTINGS\n\n")
@@ -197,10 +216,8 @@ def changeMasterPassword():
             input("Incorrect master password, get out of here.")
             os.system('cls')
             quit()
-
-def deleteDatabase(password):
-    return
-
+    elif prompt == "n":
+        input("That's what I thought!")
 
 def database_setup():
     """
@@ -209,7 +226,6 @@ def database_setup():
     print("DATABASE CREATION\n\n")
     plain_text_password = getpass.getpass("What would you like to set as your Master Password: ")
     hashed_pass = encryption.hash(plain_text_password)
-
     del plain_text_password
 
     with open("VERIFIER.txt", "w") as file:
@@ -217,7 +233,6 @@ def database_setup():
     
     key = encryption.generate_key(hashed_pass)
     encryption.encrypt("VERIFIER.txt", key)
-
     del hashed_pass
 
     write_json(json.loads(modelOfJSON), database)
