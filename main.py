@@ -57,7 +57,6 @@ def mainMenu(hashed_pass):
             break
         elif response == "1":
             db.viewDatabase(hashed_pass)
-            print("Hello")
         elif response == "2":
             db.addProfile(hashed_pass)
         elif response == "3":

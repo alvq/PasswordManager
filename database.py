@@ -64,7 +64,7 @@ def findProfile(password):
         found = False
         profileSearch = input("What is the name of the website for the Profile you want to see: ")
         for entry in entries:
-            if entry["Name"] == profileSearch:
+            if entry["Name"].lower() == profileSearch.lower():
                 found = True
                 name = entry["Name"]
                 username = entry["Username"]
