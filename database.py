@@ -9,6 +9,10 @@ modelOfJSON = """
     ]
 }
 """
+def print_dict(data):
+    print(f'Website : {data["Name"]}')
+    print(f'Username: {data["Username"]}')
+    print(f'Password: {data["Password"]}\n')
 
 def write_json(data, filename=database):
     with open(filename, "w") as f:
@@ -21,15 +25,10 @@ def viewDatabase(mPassword):
     entries = data["profiles"]
     i = 0
     for entry in entries:
-        name = entry["Name"]
-        username = entry["Username"]
-        password = entry["Password"]
         print(f"i: {i}")
-        print(f'Website : {name}')
-        print(f'Username: {username}')
-        print(f'Password: {password}\n\n')
+        print_dict(entry)
         i = i+1
-    input("Enter any key to exit: ")
+    input("Enter any key to continue: ")
     del entries
     del data
     return
@@ -43,9 +42,7 @@ def editProfile(password):
         for entry in entries:
             if entry["Name"].lower() == target.lower():
                 found = True
-                print(f'Website : {entry["Name"]}')
-                print(f'Username: {entry["Username"]}')
-                print(f'Password: {entry["Password"]}\n')
+                print_dict(entry)
                 print("Which would you like to change?\n1. Domain name  2. Username  3. Password")
                 ans = input()
                 if ans == "1":
@@ -80,7 +77,7 @@ def addProfile(password):
 
     newProfile = {}
     newProfile["Name"] = input("Enter the name of the website for this profile: ")
-    
+
     for entry in temp:
         if entry["Name"] == newProfile["Name"]:
             input("Profile already exists for this website! Returning to main menu.")
@@ -107,13 +104,8 @@ def findProfile(password):
         for entry in entries:
             if entry["Name"].lower() == profileSearch.lower():
                 found = True
-                name = entry["Name"]
-                username = entry["Username"]
-                password = entry["Password"]
                 print("Profile found!\n")
-                print(f'Website : {name}')
-                print(f'Username: {username}')
-                print(f'Password: {password}\n\n')
+                print_dict(entry)
                 break
 
         if found:
@@ -140,8 +132,21 @@ def findProfile(password):
     del entries
     return
 
-def deleteProfile():
-    return
+def deleteProfile(password):
+    viewDatabase(password)
+    data = json.loads(encryption.get_data(database, password))
+    entries = data["profiles"]
+
+    target = input("Which website would you like to delete: ")
+
+    try:
+        del entries[f"{target}"]
+        encryption.write_to_json_file(database, password, data)
+        input("Profile deleted. Returning to main menu.")
+    except KeyError:
+        input("Looks like this profile doesn't exist or caused issues in deleting. Returning to main menu.")
+        return
+
 
 
 def changeMasterPassword(password):

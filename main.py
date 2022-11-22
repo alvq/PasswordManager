@@ -64,7 +64,7 @@ def mainMenu(hashed_pass):
         elif response == "4":
             db.editProfile(hashed_pass)
         elif response == "5":
-            db.deleteProfile()
+            db.deleteProfile(hashed_pass)
         elif response == "6":
             db.deleteDatabase(hashed_pass)
         elif response == "7":
