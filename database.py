@@ -18,9 +18,9 @@ def write_json(data, filename=database):
 #takes in database and hashed password and displays all data in database from copy
 def viewDatabase(mPassword):
     data = json.loads(encryption.get_data(database, mPassword))
-    stuff = data["profiles"]
+    entries = data["profiles"]
     i = 0
-    for entry in stuff:
+    for entry in entries:
         name = entry["Name"]
         username = entry["Username"]
         password = entry["Password"]
@@ -30,12 +30,45 @@ def viewDatabase(mPassword):
         print(f'Password: {password}\n\n')
         i = i+1
     input("Enter any key to exit: ")
-    del stuff
+    del entries
     del data
     return
 
 def editProfile(password):
-    return
+    data = json.loads(encryption.get_data(database, password))
+    entries = data["profiles"]
+    found = False
+    target = input("What website would you like to edit? ")
+    while not found:
+        for entry in entries:
+            if entry["Name"].lower() == target.lower():
+                found = True
+                print(f'Website : {entry["Name"]}')
+                print(f'Username: {entry["Username"]}')
+                print(f'Password: {entry["Password"]}\n')
+                print("Which would you like to change?\n1. Domain name  2. Username  3. Password")
+                ans = input()
+                if ans == "1":
+                    entry["Name"] = input("New domain name: ")
+                elif ans == "2":
+                    entry["Username"] = input("New username: ")
+                elif ans == "3":
+                    entry["Password"] = input("New password: ")
+                else:
+                    print("Response not understood. No changes made.")
+                break 
+        if found:
+            encryption.write_to_json_file(database, password, data)
+            input("Changes made!")
+            del data, entries
+            return
+        elif not found:
+            input("Couldn't find that website in the database! No changes made. Return to main menu.")
+            del data, entries
+            return
+        else:
+            input("idk what happened tbh")
+            return
 
 
 #TODO

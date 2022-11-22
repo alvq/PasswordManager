@@ -43,10 +43,10 @@ def mainMenu(hashed_pass):
         print("1. View database")
         print("2. Add Profile")
         print("3. Find Profile")
-        print("4. Delete Profile")
-        print("5. Change Master Password")
+        print("4. Edit Profile")
+        print("5. Delete Profile")
         print("6. Delete Database")
-        print("7. Edit Profile")
+        print("7. Change Master Password")
         print("0. Exit\n\n")
 
         response = input("Please select an option: ")
@@ -57,18 +57,19 @@ def mainMenu(hashed_pass):
             break
         elif response == "1":
             db.viewDatabase(hashed_pass)
+            print("Hello")
         elif response == "2":
             db.addProfile(hashed_pass)
         elif response == "3":
             db.findProfile(hashed_pass)
         elif response == "4":
-            db.deleteProfile()
+            db.editProfile(hashed_pass)
         elif response == "5":
-            db.changeMasterPassword(hashed_pass)
+            db.deleteProfile()
         elif response == "6":
             db.deleteDatabase(hashed_pass)
         elif response == "7":
-            db.editProfile(hashed_pass)
+            db.changeMasterPassword(hashed_pass)
         else:
             cls()
             print("Response not understood. Stop messing around.")
