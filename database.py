@@ -139,16 +139,16 @@ def deleteProfile(password):
     
     target = input("Which website would you like to remove: ")
 
-    for entry in entries:
-        if entry["Name"].lower() == target.lower():
-            del entry["Name"]
+    for i in range(len(entries)):
+        if entries[i]["Name"].lower() == target.lower():
+            del entries[i]
+            break
         else:
             pass
 
     encryption.write_to_json_file(database, password, data)
 
     input("Profile removed.")
-
 
 
 
