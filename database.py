@@ -163,9 +163,8 @@ def deleteDatabase():
         hashed_test = encryption.hash(test)
         if verify_master(hashed_test):
             data = json.loads(encryption.get_data(database, hashed_test))
-            entries = data["profiles"]            
-            for i in range(len(entries)-1):
-                del entries[i]
+            entries = data["profiles"]
+            entries.clear()
             encryption.write_to_json_file(database, hashed_test, data)
             input("Database wiped!")
         else:
