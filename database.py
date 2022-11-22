@@ -63,7 +63,7 @@ def editProfile(password):
             del data, entries
             return
         elif not found:
-            input("Couldn't find that website in the database! No changes made. Return to main menu.")
+            input("Couldn't find that profile in the database! No changes made. Return to main menu.")
             del data, entries
             return
         else:
@@ -72,19 +72,27 @@ def editProfile(password):
 
 
 #TODO
-#ADD SEARCH TO SEE IF ALREADY IN DATABASE
+#ADD SEARCH TO SEE IF ALREADY IN DATABASE - Done.11/22/22
 
 def addProfile(password):
+    data = json.loads(encryption.get_data(database, password))
+    temp = data["profiles"]
+
     newProfile = {}
     newProfile["Name"] = input("Enter the name of the website for this profile: ")
+    
+    for entry in temp:
+        if entry["Name"] == newProfile["Name"]:
+            input("Profile already exists for this website! Returning to main menu.")
+            return
+
     newProfile["Username"] = input("Enter the username: ")
     newProfile["Password"] = input("Enter the password: ")
 
-    data = json.loads(encryption.get_data(database, password))
-    temp = data["profiles"]
-    temp.append(newProfile)    
 
+    temp.append(newProfile)
     encryption.write_to_json_file(database, password, data)
+
     del data
     del temp
     return
