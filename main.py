@@ -7,6 +7,8 @@ import encryption
 import database as db
 from time import sleep
 
+#TODO
+#Loop password entry on failure, possibly limit amount of loopsk
 
 def cls(): os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -22,17 +24,16 @@ def main():
         db.database_setup()
         sleep(1)
     cls()
-    print("WELCOME TO LOCKIT  \n\n\n\n")
+    print("WELCOME TO LOCKIT\n\n\n\n")
     hashed_pass = encryption.hash(getpass.getpass("Enter the correct Master Password: "))
 
-    try:
-        db.verify_master(hashed_pass)
+    if db.verify_master(hashed_pass):
         print("\n\nLoading...")
         sleep(2)
         mainMenu(hashed_pass)
         del hashed_pass
-    except:
-        print("Something went wrong. Goodbye.")
+    else:
+        print("Wrong password. Leave.")
     
 def mainMenu(hashed_pass):
     cls()
@@ -66,9 +67,9 @@ def mainMenu(hashed_pass):
         elif response == "5":
             db.deleteProfile(hashed_pass)
         elif response == "6":
-            db.deleteDatabase(hashed_pass)
+            db.deleteDatabase()
         elif response == "7":
-            db.changeMasterPassword(hashed_pass)
+            hashed_pass = db.changeMasterPassword()
         else:
             cls()
             print("Response not understood. Stop messing around.")

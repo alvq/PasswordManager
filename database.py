@@ -1,6 +1,7 @@
 import json
 import encryption
 import getpass
+import os
 
 database = "MAINDATABASE.json"
 modelOfJSON = """
@@ -16,7 +17,7 @@ def print_dict(data):
 
 def write_json(data, filename=database):
     with open(filename, "w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f)
 
 
 #takes in database and hashed password and displays all data in database from copy
@@ -47,16 +48,18 @@ def editProfile(password):
                 ans = input()
                 if ans == "1":
                     entry["Name"] = input("New domain name: ")
+                    input("Changes made!")
                 elif ans == "2":
                     entry["Username"] = input("New username: ")
+                    input("Changes made!")                    
                 elif ans == "3":
                     entry["Password"] = input("New password: ")
+                    input("Changes made!")                    
                 else:
                     print("Response not understood. No changes made.")
                 break 
         if found:
             encryption.write_to_json_file(database, password, data)
-            input("Changes made!")
             del data, entries
             return
         elif not found:
@@ -109,20 +112,20 @@ def findProfile(password):
                 break
 
         if found:
-            ans1 = input("Would you like to search for another Profile? (Y/N) ")
-            if ans1 == "Y":
+            ans1 = input("Would you like to search for another Profile? (Y/N) ").lower()
+            if ans1 == "y":
                 continue
-            elif ans1 == "N":
+            elif ans1 == "n":
                 exit = True
                 break
             else:
                 input("Didn't understand input. Press any key to return to main menu.")
                 return
         elif not found:
-            ans2 = input("It looks like either the name was mistyped or your website has no Profile in the database yet. Would you like to start another search? (Y/N) ")
-            if ans2 == "Y":
+            ans2 = input("It looks like either the name was mistyped or your website has no Profile in the database yet. Would you like to start another search? (Y/N) ").lower()
+            if ans2 == "y":
                 continue
-            elif ans2 == "N":
+            elif ans2 == "n":
                 exit = True
                 break
             else:
@@ -138,22 +141,62 @@ def deleteProfile(password):
     entries = data["profiles"]
     
     target = input("Which website would you like to remove: ")
-
+    deleted = False
     for i in range(len(entries)):
         if entries[i]["Name"].lower() == target.lower():
+            deleted = True
             del entries[i]
             break
         else:
             pass
+    if deleted:
+        encryption.write_to_json_file(database, password, data)
+        input("Profile removed.")
+    else:
+        input("Profile not found in database to remove. Returning to main menu.")
 
-    encryption.write_to_json_file(database, password, data)
-
-    input("Profile removed.")
 
 
-
-def changeMasterPassword(password):
-    return
+def changeMasterPassword():
+    print("MASTER PASSWORD SETTINGS\n\n")
+    prompt = input("Are you sure you want to change your master password? (Yes/No) ")
+    if prompt.lower() == "yes":
+        test = getpass.getpass("\nEnter your current master password: ")
+        hashed_test = encryption.hash(test)
+        if verify_master(hashed_test):
+            #decrypt database to reencrypt it with the new password
+            oldkey = encryption.generate_key(hashed_test, load_existing_salt=True, save_salt=False)
+            encryption.decrypt(database, oldkey)
+            del test
+            loop = True
+            while loop:
+                new_master_pass = getpass.getpass("Enter your new master password: ")
+                test_input = getpass.getpass("Reenter the password to confirm: ")
+                if new_master_pass == test_input:
+                    new_master_pass_HASHED = encryption.hash(new_master_pass)
+                    del new_master_pass, test_input
+                    loop = False
+                    with open("VERIFIER.txt", "w") as file:
+                        file.write(new_master_pass_HASHED)
+                    key = encryption.generate_key(new_master_pass_HASHED)
+                    encryption.encrypt("VERIFIER.txt", key)
+                    encryption.encrypt(database, key)
+                    input("\n\nMaster password changed. Don't forget your new password!")
+                    del key
+                    return new_master_pass_HASHED
+                else:
+                    cont =input("Passwords did not match. Press enter to try again or 0 to exit.")
+                    if cont == "0":
+                        #passwords werent changed, encrypting file before exit
+                        encryption.encrypt(database, oldkey)
+                        del oldkey
+                        loop = False
+                    else:
+                        pass
+        else:
+            input("Incorrect master password, get out of here.")
+            os.system('cls')
+            quit()
 
 def deleteDatabase(password):
     return
@@ -177,10 +220,7 @@ def database_setup():
 
     del hashed_pass
 
-
-    #BOOKMARK: create db empty textfile and encrypt
-    with open(database, "w") as database_file:
-        json.dump(json.loads(modelOfJSON), database_file)
+    write_json(json.loads(modelOfJSON), database)
 
     encryption.encrypt(database, key)
 
@@ -190,20 +230,20 @@ def database_setup():
 
 def verify_master(hashed_input):
 
-    key = encryption.generate_key(hashed_input, load_existing_salt=True, save_salt=False)
-    encryption.decrypt("VERIFIER.txt", key)
+    try:
+        key = encryption.generate_key(hashed_input, load_existing_salt=True, save_salt=False)
+        encryption.decrypt("VERIFIER.txt", key)
 
-    with open("VERIFIER.txt", "r") as file:
-        master = file.read()
+        with open("VERIFIER.txt", "r") as file:
+            master = file.read()
 
-    encryption.encrypt("VERIFIER.txt", key)
-    del key
+        encryption.encrypt("VERIFIER.txt", key)
+        del key
 
-    if hashed_input == master:
-        del master
-        del hashed_input
-        return True
-    else:
-        del master
+        if hashed_input == master:
+            del master
+            del hashed_input
+            return True
+    except:
         del hashed_input
         return False
