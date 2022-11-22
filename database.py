@@ -73,12 +73,12 @@ def editProfile(password):
 
 def addProfile(password):
     data = json.loads(encryption.get_data(database, password))
-    temp = data["profiles"]
+    entries = data["profiles"]
 
     newProfile = {}
     newProfile["Name"] = input("Enter the name of the website for this profile: ")
 
-    for entry in temp:
+    for entry in entries:
         if entry["Name"] == newProfile["Name"]:
             input("Profile already exists for this website! Returning to main menu.")
             return
@@ -87,11 +87,11 @@ def addProfile(password):
     newProfile["Password"] = input("Enter the password: ")
 
 
-    temp.append(newProfile)
+    entries.append(newProfile)
     encryption.write_to_json_file(database, password, data)
 
     del data
-    del temp
+    del entries
     return
 
 def findProfile(password):
@@ -136,16 +136,19 @@ def deleteProfile(password):
     viewDatabase(password)
     data = json.loads(encryption.get_data(database, password))
     entries = data["profiles"]
+    
+    target = input("Which website would you like to remove: ")
 
-    target = input("Which website would you like to delete: ")
+    for entry in entries:
+        if entry["Name"].lower() == target.lower():
+            del entry["Name"]
+        else:
+            pass
 
-    try:
-        del entries[f"{target}"]
-        encryption.write_to_json_file(database, password, data)
-        input("Profile deleted. Returning to main menu.")
-    except KeyError:
-        input("Looks like this profile doesn't exist or caused issues in deleting. Returning to main menu.")
-        return
+    encryption.write_to_json_file(database, password, data)
+
+    input("Profile removed.")
+
 
 
 
