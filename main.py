@@ -1,7 +1,6 @@
 #Create a random password generator!
 
 import os
-import secrets
 import getpass
 import encryption
 import database as db
@@ -24,16 +23,22 @@ def main():
         db.database_setup()
         sleep(1)
     cls()
-    print("WELCOME TO LOCKIT\n\n\n\n")
-    hashed_pass = encryption.hash(getpass.getpass("Enter the correct Master Password: "))
-
-    if db.verify_master(hashed_pass):
-        print("\n\nLoading...")
-        sleep(2)
-        mainMenu(hashed_pass)
-        del hashed_pass
-    else:
-        print("Wrong password. Leave.")
+ 
+    for attempts in range(3):
+        print("WELCOME TO LOCKIT\n\n\n\n")
+        hashed_pass = encryption.hash(getpass.getpass("Enter the correct Master Password: "))
+        if db.verify_master(hashed_pass):
+            print("\n\nLoading...")
+            sleep(1)
+            mainMenu(hashed_pass)
+            del hashed_pass
+            return
+        else:
+            input("Wrong password. Press enter to try again.")
+            cls()
+    print("Too many failed attempts. Quitting..")
+    sleep(1)
+    cls()
     
 def mainMenu(hashed_pass):
     cls()
@@ -76,26 +81,6 @@ def mainMenu(hashed_pass):
             input()
             cls()
     return
-
-def generatePassword(size=12):
-    #gather our characters
-    if size < 8:
-        size = 12
-
-    lower = 'abcdefghijklmnopqrstuvwxyz'
-    upper = lower.upper()
-    symbols = '!@#$%^&*()_+-=[]\{}|;:,./<>?'
-    numbers = '1234567890'
-
-    all = lower + upper + symbols + numbers
-
-    #loop through each character
-    password = ''
-    for i in range(size):
-        password = ''.join([password, secrets.choice(all)])
-
-    return password
-
 
 if __name__ == "__main__":
     main()

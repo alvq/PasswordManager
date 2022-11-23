@@ -2,6 +2,7 @@ import json
 import encryption
 import getpass
 import os
+import secrets
 
 database = "MAINDATABASE.json"
 modelOfJSON = """
@@ -10,6 +11,25 @@ modelOfJSON = """
     ]
 }
 """
+def generatePassword(size=12):
+    #gather our characters
+    if size < 8:
+        size = 12
+
+    lower = 'abcdefghijklmnopqrstuvwxyz'
+    upper = lower.upper()
+    symbols = '!@#$%^&*()_+-=[]\{}|;:,./<>?'
+    numbers = '1234567890'
+
+    all = lower + upper + symbols + numbers
+
+    #loop through each character
+    password = ''
+    for i in range(size):
+        password = ''.join([password, secrets.choice(all)])
+
+    return password
+
 def print_dict(data):
     print(f'Website : {data["Name"]}')
     print(f'Username: {data["Username"]}')
@@ -22,54 +42,15 @@ def write_json(data, filename=database):
 
 #takes in database and hashed password and displays all data in database from copy
 def viewDatabase(mPassword):
+    print("PROFILE DATABASE\n\n")
     data = json.loads(encryption.get_data(database, mPassword))
     entries = data["profiles"]
-    i = 0
     for entry in entries:
-        print(f"i: {i}")
         print_dict(entry)
-        i = i+1
     input("Enter any key to continue: ")
     del entries
     del data
     return
-
-def editProfile(password):
-    data = json.loads(encryption.get_data(database, password))
-    entries = data["profiles"]
-    found = False
-    target = input("What website would you like to edit? ")
-    while not found:
-        for entry in entries:
-            if entry["Name"].lower() == target.lower():
-                found = True
-                print_dict(entry)
-                print("Which would you like to change?\n1. Domain name  2. Username  3. Password")
-                ans = input()
-                if ans == "1":
-                    entry["Name"] = input("New domain name: ")
-                    input("Changes made!")
-                elif ans == "2":
-                    entry["Username"] = input("New username: ")
-                    input("Changes made!")                    
-                elif ans == "3":
-                    entry["Password"] = input("New password: ")
-                    input("Changes made!")                    
-                else:
-                    print("Response not understood. No changes made.")
-                break 
-        if found:
-            encryption.write_to_json_file(database, password, data)
-            del data, entries
-            return
-        elif not found:
-            input("Couldn't find that profile in the database! No changes made. Return to main menu.")
-            del data, entries
-            return
-        else:
-            input("idk what happened tbh")
-            return
-
 
 #TODO
 #ADD SEARCH TO SEE IF ALREADY IN DATABASE - Done.11/22/22
@@ -87,8 +68,21 @@ def addProfile(password):
             return
 
     newProfile["Username"] = input("Enter the username: ")
-    newProfile["Password"] = input("Enter the password: ")
-
+    genPass = input("\nFor the password would you like to\n1. Generate one or 2. Create your own\n")
+    if genPass == "1":
+        generated_pass = generatePassword()
+        print(f"Your generated password is {generated_pass}!")
+        newProfile["Password"] = generated_pass
+    elif genPass == "2":
+        newProfile["Password"] = input("Enter your desired password: ")
+    else:
+        print("Input not one of your options. Generating password.")
+        generated_pass = generatePassword()
+        print(f"Your generated password is {generated_pass}!")
+        newProfile["Password"] = generated_pass 
+    print(f"Your new profile is as follows:\n")  
+    print_dict(newProfile)
+    input()
 
     entries.append(newProfile)
     encryption.write_to_json_file(database, password, data)
@@ -134,6 +128,43 @@ def findProfile(password):
     del data
     del entries
     return
+
+def editProfile(password):
+    data = json.loads(encryption.get_data(database, password))
+    entries = data["profiles"]
+    found = False
+    target = input("What website would you like to edit? ")
+    while not found:
+        for entry in entries:
+            if entry["Name"].lower() == target.lower():
+                found = True
+                print_dict(entry)
+                print("Which would you like to change?\n1. Domain name  2. Username  3. Password")
+                ans = input()
+                if ans == "1":
+                    entry["Name"] = input("New domain name: ")
+                    input("Changes made!")
+                elif ans == "2":
+                    entry["Username"] = input("New username: ")
+                    input("Changes made!")                    
+                elif ans == "3":
+                    entry["Password"] = input("New password: ")
+                    input("Changes made!")                    
+                else:
+                    print("Response not understood. No changes made.")
+                break 
+        if found:
+            encryption.write_to_json_file(database, password, data)
+            del data, entries
+            return
+        elif not found:
+            input("Couldn't find that profile in the database! No changes made. Return to main menu.")
+            del data, entries
+            return
+        else:
+            input("idk what happened tbh")
+            return
+
 
 def deleteProfile(password):
     viewDatabase(password)
